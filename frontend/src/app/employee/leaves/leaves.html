@@ -1,0 +1,473 @@
+<div class="space-y-8 relative max-w-6xl mx-auto">
+
+  <!-- Floating Toast Notification Banner -->
+  @if (showToast()) {
+    <div
+      class="toast-animate fixed top-6 right-6 z-50 flex items-center gap-3 px-4 py-3 rounded-xl bg-white/95 backdrop-blur-md text-slate-800 shadow-xl border border-slate-200 transition-all duration-300 min-w-[280px] max-w-sm"
+      [class.border-l-4]="true"
+      [class.border-l-emerald-500]="toastType() === 'success'"
+      [class.border-l-rose-500]="toastType() === 'error'"
+    >
+      <div
+        class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
+        [class.bg-emerald-50]="toastType() === 'success'"
+        [class.text-emerald-600]="toastType() === 'success'"
+        [class.bg-rose-50]="toastType() === 'error'"
+        [class.text-rose-600]="toastType() === 'error'"
+      >
+        <mat-icon class="!w-4 !h-4 !text-lg leading-none flex items-center justify-center">
+          {{ toastType() === 'success' ? 'check_circle' : 'error' }}
+        </mat-icon>
+      </div>
+
+      <div class="flex flex-col pr-2">
+        <span class="text-xs font-bold text-slate-800">
+          {{ toastMessage() }}
+        </span>
+      </div>
+
+      <button
+        (click)="showToast.set(false)"
+        class="text-slate-400 hover:text-slate-600 transition-colors ml-auto p-1 rounded-lg hover:bg-slate-100"
+      >
+        <mat-icon class="!w-4 !h-4 !text-sm leading-none flex items-center justify-center">close</mat-icon>
+      </button>
+    </div>
+  }
+
+  <!-- Clean Big Text Tabs Header (Replaces Page Header) -->
+  <div class="flex items-center gap-8 border-b border-slate-200/80 pb-4">
+    <button
+      (click)="activeTab.set('apply')"
+      class="text-xl sm:text-2xl font-extrabold tracking-tight transition-colors relative pb-1"
+      [class.text-[#6c5ce7]]="activeTab() === 'apply'"
+      [class.text-slate-400]="activeTab() !== 'apply'"
+      [class.hover:text-slate-600]="activeTab() !== 'apply'"
+    >
+      <span>Apply Leave</span>
+      @if (activeTab() === 'apply') {
+        <span class="absolute -bottom-[17px] left-0 right-0 h-1 bg-[#6c5ce7] rounded-full"></span>
+      }
+    </button>
+
+    <button
+      (click)="activeTab.set('history')"
+      class="text-xl sm:text-2xl font-extrabold tracking-tight transition-colors relative pb-1"
+      [class.text-[#6c5ce7]]="activeTab() === 'history'"
+      [class.text-slate-400]="activeTab() !== 'history'"
+      [class.hover:text-slate-600]="activeTab() !== 'history'"
+    >
+      <span>Leave History</span>
+      @if (activeTab() === 'history') {
+        <span class="absolute -bottom-[17px] left-0 right-0 h-1 bg-[#6c5ce7] rounded-full"></span>
+      }
+    </button>
+  </div>
+
+  <!-- TAB 1: APPLY LEAVE CONTENT -->
+  @if (activeTab() === 'apply') {
+    <div class="space-y-8 animate-in fade-in duration-150">
+
+      <!-- Allowed Leaves Quota Summary (Single Row) -->
+      <div class="space-y-3">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-bold uppercase tracking-wider text-slate-400">
+            Allowed Leaves Quota
+          </span>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          @for (leave of leave_types(); track leave.id) {
+            <div class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm flex items-center justify-between gap-3">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-[#6c5ce7]/10 text-[#6c5ce7] flex items-center justify-center shrink-0">
+                  <mat-icon class="!w-5 !h-5 !text-xl leading-none flex items-center justify-center text-center select-none">
+                    {{ getLeaveIcon(leave.name) }}
+                  </mat-icon>
+                </div>
+                <div>
+                  <h3 class="font-extrabold text-slate-900 text-xs sm:text-sm truncate">
+                    {{ leave.name }}
+                  </h3>
+                  <span class="text-[10px] font-semibold text-slate-400 block">Allowed</span>
+                </div>
+              </div>
+
+              <div class="text-right shrink-0">
+                <span class="text-xl font-black text-slate-900 tracking-tight">
+                  {{ leave.annual_days }}
+                </span>
+                <span class="text-[10px] font-bold text-slate-500 block">Days</span>
+              </div>
+            </div>
+          }
+
+          <!-- Total Quota Card -->
+          <div class="bg-gradient-to-r from-[#6c5ce7] to-[#8c7ae6] rounded-2xl p-4 text-white shadow-md shadow-purple-500/10 flex items-center justify-between gap-3">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-md text-white flex items-center justify-center shrink-0">
+                <mat-icon class="!w-5 !h-5 !text-xl leading-none flex items-center justify-center text-center select-none">stars</mat-icon>
+              </div>
+              <div>
+                <h3 class="font-extrabold text-white text-xs sm:text-sm tracking-tight">
+                  Total Quota
+                </h3>
+                <span class="text-[10px] font-semibold text-purple-100 block">Annual Sum</span>
+              </div>
+            </div>
+
+            <div class="text-right shrink-0">
+              <span class="text-2xl font-black text-white tracking-tight">
+                {{ totalLeaveBalance() }}
+              </span>
+              <span class="text-[10px] font-bold text-purple-100 block">Days / Year</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Professional Form Card -->
+      <div class="bg-white rounded-3xl p-8 sm:p-10 lg:p-12 border border-slate-200/80 shadow-sm space-y-8">
+        <div class="flex items-center justify-between border-b border-slate-100 pb-6">
+          <h2 class="text-2xl font-extrabold text-slate-900 tracking-tight">
+            Leave Application Form
+          </h2>
+
+          @if (calculatedDays() > 0) {
+            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#6c5ce7]/10 text-[#6c5ce7] border border-[#6c5ce7]/20 text-xs font-bold animate-in fade-in duration-200">
+              <mat-icon class="!w-4 !h-4 !text-base">schedule</mat-icon>
+              <span>Duration: {{ calculatedDays() }} Day{{ calculatedDays() > 1 ? 's' : '' }}</span>
+            </div>
+          }
+        </div>
+
+        <form (ngSubmit)="applyLeave()" class="space-y-8">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="space-y-2">
+              <label class="font-extrabold text-slate-800 text-xs uppercase tracking-wider block">
+                Leave Category <span class="text-rose-500">*</span>
+              </label>
+              <select
+                [ngModel]="leaveTypeId()"
+                (ngModelChange)="leaveTypeId.set($event)"
+                name="leaveTypeId"
+                class="w-full h-14 px-5 rounded-xl border border-slate-300 focus:border-[#6c5ce7] focus:ring-4 focus:ring-[#6c5ce7]/10 outline-none transition-all text-base font-semibold text-slate-900 bg-white cursor-pointer shadow-sm"
+              >
+                <option [ngValue]="null" disabled>Select Category</option>
+                @for (type of leave_types(); track type.id) {
+                  <option [ngValue]="type.id">
+                    {{ type.name }} ({{ type.annual_days }} Days)
+                  </option>
+                }
+              </select>
+            </div>
+
+            <div class="space-y-2">
+              <label class="font-extrabold text-slate-800 text-xs uppercase tracking-wider block">
+                Start Date <span class="text-rose-500">*</span>
+              </label>
+              <input
+                type="date"
+                [ngModel]="startDate()"
+                (ngModelChange)="startDate.set($event)"
+                name="startDate"
+                class="w-full h-14 px-5 rounded-xl border border-slate-300 focus:border-[#6c5ce7] focus:ring-4 focus:ring-[#6c5ce7]/10 outline-none transition-all text-base font-semibold text-slate-900 bg-white shadow-sm"
+              />
+            </div>
+
+            <div class="space-y-2">
+              <label class="font-extrabold text-slate-800 text-xs uppercase tracking-wider block">
+                End Date <span class="text-rose-500">*</span>
+              </label>
+              <input
+                type="date"
+                [ngModel]="endDate()"
+                (ngModelChange)="endDate.set($event)"
+                name="endDate"
+                class="w-full h-14 px-5 rounded-xl border border-slate-300 focus:border-[#6c5ce7] focus:ring-4 focus:ring-[#6c5ce7]/10 outline-none transition-all text-base font-semibold text-slate-900 bg-white shadow-sm"
+              />
+            </div>
+          </div>
+
+          <div class="space-y-2">
+            <label class="font-extrabold text-slate-800 text-xs uppercase tracking-wider block">
+              Reason For Leave <span class="text-rose-500">*</span>
+            </label>
+            <textarea
+              [ngModel]="reason()"
+              (ngModelChange)="reason.set($event)"
+              name="reason"
+              rows="5"
+              placeholder="Enter reason for leave..."
+              class="w-full p-5 rounded-xl border border-slate-300 focus:border-[#6c5ce7] focus:ring-4 focus:ring-[#6c5ce7]/10 outline-none transition-all text-base font-medium text-slate-900 bg-white resize-none shadow-sm"
+            ></textarea>
+          </div>
+
+          <div class="flex items-center justify-end gap-3 pt-6 border-t border-slate-100">
+            <button
+              type="button"
+              (click)="resetForm()"
+              class="px-7 py-3.5 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition-all border border-slate-300 bg-white"
+            >
+              Reset
+            </button>
+
+            <button
+              type="submit"
+              [disabled]="isSubmitting()"
+              class="px-9 py-4 rounded-xl bg-[#6c5ce7] hover:bg-[#5b4bc4] text-white text-xs font-bold shadow-lg shadow-purple-500/25 transition-all active:scale-95 flex items-center gap-2 disabled:opacity-50"
+            >
+              <mat-icon class="!w-4 !h-4 !text-base leading-none">
+                {{ isSubmitting() ? 'hourglass_empty' : 'send' }}
+              </mat-icon>
+              <span>{{ isSubmitting() ? 'Submitting...' : 'Submit Application' }}</span>
+            </button>
+          </div>
+        </form>
+      </div>
+
+    </div>
+  }
+
+  <!-- TAB 2: LEAVE HISTORY CONTENT (COLUMN-WISE LIST VIEW WITH ALTERNATE BG & APPLIED DATE) -->
+  @if (activeTab() === 'history') {
+    <div class="space-y-6 animate-in fade-in duration-150">
+
+      <!-- SECTION 1: PENDING REQUESTS -->
+      <div class="space-y-3">
+        <div class="flex items-center justify-between">
+          <h2 class="text-sm font-semibold text-slate-700">
+            Pending Requests
+          </h2>
+          <span class="text-xs text-slate-400 font-medium">
+            {{ pendingRequests().length }} Pending
+          </span>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm divide-y divide-slate-100 overflow-hidden">
+          
+          <!-- Grid Header Row -->
+          <div class="hidden md:grid md:grid-cols-12 gap-4 px-5 py-3 bg-slate-100/70 text-[11px] font-bold uppercase tracking-wider text-slate-500 border-b border-slate-200/80">
+            <div class="col-span-3">Category</div>
+            <div class="col-span-2">Applied Date</div>
+            <div class="col-span-3">Leave Period</div>
+            <div class="col-span-3">Reason</div>
+            <div class="col-span-1 text-right">Status</div>
+          </div>
+
+          @for (req of pendingRequests(); track req.id; let i = $index) {
+            <div
+              class="px-5 py-4 grid grid-cols-1 md:grid-cols-12 gap-3 md:gap-4 items-center transition-colors"
+              [class.bg-white]="i % 2 === 0"
+              [class.bg-slate-100]="i % 2 !== 0"
+            >
+              <!-- Category -->
+              <div class="col-span-3">
+                <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block md:hidden">Category</span>
+                <span class="text-sm font-semibold text-slate-900">
+                  {{ req.leave_type_name || 'Leave Category' }}
+                </span>
+              </div>
+
+              <!-- Applied Date -->
+              <div class="col-span-2">
+                <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block md:hidden">Applied Date</span>
+                <span class="text-xs font-medium text-slate-600">
+                  {{ (req.created_at | date:'mediumDate') || '-' }}
+                </span>
+              </div>
+
+              <!-- Leave Period & Duration -->
+              <div class="col-span-3">
+                <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block md:hidden">Leave Period</span>
+                <div class="text-xs text-slate-800 font-medium">
+                  {{ req.start_date | date:'mediumDate' }} - {{ req.end_date | date:'mediumDate' }}
+                </div>
+                <span class="text-[11px] text-slate-500 font-normal block">
+                  ({{ calculateDurationDays(req.start_date, req.end_date) }} Day{{ calculateDurationDays(req.start_date, req.end_date) > 1 ? 's' : '' }})
+                </span>
+              </div>
+
+              <!-- Reason -->
+              <div class="col-span-3">
+                <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block md:hidden">Reason</span>
+                <span class="text-xs text-slate-600 font-normal line-clamp-2" [title]="req.reason || '-'">
+                  {{ req.reason || '-' }}
+                </span>
+              </div>
+
+              <!-- Status -->
+              <div class="col-span-1 md:text-right">
+                <span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200/60 inline-block">
+                  Pending
+                </span>
+              </div>
+            </div>
+          } @empty {
+            <div class="p-5 text-xs text-slate-400 font-medium text-center bg-white">
+              No pending leave requests.
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- SECTION 2: APPROVED REQUESTS -->
+      <div class="space-y-3 pt-2">
+        <div class="flex items-center justify-between">
+          <h2 class="text-sm font-semibold text-slate-700">
+            Approved Requests
+          </h2>
+          <span class="text-xs text-slate-400 font-medium">
+            {{ approvedRequests().length }} Approved
+          </span>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm divide-y divide-slate-100 overflow-hidden">
+          
+          <!-- Grid Header Row -->
+          <div class="hidden md:grid md:grid-cols-12 gap-4 px-5 py-3 bg-slate-100/70 text-[11px] font-bold uppercase tracking-wider text-slate-500 border-b border-slate-200/80">
+            <div class="col-span-3">Category</div>
+            <div class="col-span-2">Applied Date</div>
+            <div class="col-span-3">Leave Period</div>
+            <div class="col-span-3">Reason</div>
+            <div class="col-span-1 text-right">Status</div>
+          </div>
+
+          @for (req of approvedRequests(); track req.id; let i = $index) {
+            <div
+              class="px-5 py-4 grid grid-cols-1 md:grid-cols-12 gap-3 md:gap-4 items-center transition-colors"
+              [class.bg-white]="i % 2 === 0"
+              [class.bg-slate-50]="i % 2 !== 0"
+            >
+              <!-- Category -->
+              <div class="col-span-3">
+                <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block md:hidden">Category</span>
+                <span class="text-sm font-semibold text-slate-900">
+                  {{ req.leave_type_name || 'Leave Category' }}
+                </span>
+              </div>
+
+              <!-- Applied Date -->
+              <div class="col-span-2">
+                <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block md:hidden">Applied Date</span>
+                <span class="text-xs font-medium text-slate-600">
+                  {{ (req.created_at | date:'mediumDate') || '-' }}
+                </span>
+              </div>
+
+              <!-- Leave Period & Duration -->
+              <div class="col-span-3">
+                <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block md:hidden">Leave Period</span>
+                <div class="text-xs text-slate-800 font-medium">
+                  {{ req.start_date | date:'mediumDate' }} - {{ req.end_date | date:'mediumDate' }}
+                </div>
+                <span class="text-[11px] text-slate-500 font-normal block">
+                  ({{ calculateDurationDays(req.start_date, req.end_date) }} Day{{ calculateDurationDays(req.start_date, req.end_date) > 1 ? 's' : '' }})
+                </span>
+              </div>
+
+              <!-- Reason -->
+              <div class="col-span-3">
+                <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block md:hidden">Reason</span>
+                <span class="text-xs text-slate-600 font-normal line-clamp-2" [title]="req.reason || '-'">
+                  {{ req.reason || '-' }}
+                </span>
+              </div>
+
+              <!-- Status -->
+              <div class="col-span-1 md:text-right">
+                <span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200/60 inline-block">
+                  Approved
+                </span>
+              </div>
+            </div>
+          } @empty {
+            <div class="p-5 text-xs text-slate-400 font-medium text-center bg-white">
+              No approved leave requests yet.
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- SECTION 3: REJECTED REQUESTS -->
+      <div class="space-y-3 pt-2">
+        <div class="flex items-center justify-between">
+          <h2 class="text-sm font-semibold text-slate-700">
+            Rejected Requests
+          </h2>
+          <span class="text-xs text-slate-400 font-medium">
+            {{ rejectedRequests().length }} Rejected
+          </span>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm divide-y divide-slate-100 overflow-hidden">
+          
+          <!-- Grid Header Row -->
+          <div class="hidden md:grid md:grid-cols-12 gap-4 px-5 py-3 bg-slate-100/70 text-[11px] font-bold uppercase tracking-wider text-slate-500 border-b border-slate-200/80">
+            <div class="col-span-3">Category</div>
+            <div class="col-span-2">Applied Date</div>
+            <div class="col-span-3">Leave Period</div>
+            <div class="col-span-3">Reason</div>
+            <div class="col-span-1 text-right">Status</div>
+          </div>
+
+          @for (req of rejectedRequests(); track req.id; let i = $index) {
+            <div
+              class="px-5 py-4 grid grid-cols-1 md:grid-cols-12 gap-3 md:gap-4 items-center transition-colors"
+              [class.bg-white]="i % 2 === 0"
+              [class.bg-slate-50]="i % 2 !== 0"
+            >
+              <!-- Category -->
+              <div class="col-span-3">
+                <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block md:hidden">Category</span>
+                <span class="text-sm font-semibold text-slate-900">
+                  {{ req.leave_type_name || 'Leave Category' }}
+                </span>
+              </div>
+
+              <!-- Applied Date -->
+              <div class="col-span-2">
+                <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block md:hidden">Applied Date</span>
+                <span class="text-xs font-medium text-slate-600">
+                  {{ (req.created_at | date:'mediumDate') || '-' }}
+                </span>
+              </div>
+
+              <!-- Leave Period & Duration -->
+              <div class="col-span-3">
+                <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block md:hidden">Leave Period</span>
+                <div class="text-xs text-slate-800 font-medium">
+                  {{ req.start_date | date:'mediumDate' }} - {{ req.end_date | date:'mediumDate' }}
+                </div>
+                <span class="text-[11px] text-slate-500 font-normal block">
+                  ({{ calculateDurationDays(req.start_date, req.end_date) }} Day{{ calculateDurationDays(req.start_date, req.end_date) > 1 ? 's' : '' }})
+                </span>
+              </div>
+
+              <!-- Reason -->
+              <div class="col-span-3">
+                <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block md:hidden">Reason</span>
+                <span class="text-xs text-slate-600 font-normal line-clamp-2" [title]="req.reason || '-'">
+                  {{ req.reason || '-' }}
+                </span>
+              </div>
+
+              <!-- Status -->
+              <div class="col-span-1 md:text-right">
+                <span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-rose-50 text-rose-700 border border-rose-200/60 inline-block">
+                  Rejected
+                </span>
+              </div>
+            </div>
+          } @empty {
+            <div class="p-5 text-xs text-slate-400 font-medium text-center bg-white">
+              No rejected leave requests.
+            </div>
+          }
+        </div>
+      </div>
+
+    </div>
+  }
+
+</div>

@@ -1,0 +1,15 @@
+/* Employee Panel Navigation Layout Styles matching design system */
+
+.active-nav-link {
+  background-color: #6c5ce7 !important;
+  color: #ffffff !important;
+  box-shadow: 0 8px 20px -4px rgba(108, 92, 231, 0.35);
+}
+
+.active-nav-link .nav-icon {
+  color: #ffffff !important;
+}
+
+.nav-link {
+  transition: all 0.2s ease-in-out;
+}

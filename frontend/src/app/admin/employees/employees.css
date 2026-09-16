@@ -1,0 +1,24 @@
+/* Toast Animation & Icon Layout Polish */
+
+@keyframes slideDownIn {
+  0% {
+    opacity: 0;
+    transform: translateY(-24px) scale(0.92);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.toast-animate {
+  animation: slideDownIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Ensure MatIcon elements align vertically without clipping */
+mat-icon {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  line-height: 1 !important;
+}

@@ -1,0 +1,51 @@
+/* Custom styling for login page matching reference image */
+
+.login-card {
+  box-shadow: 0 25px 60px -15px rgba(108, 92, 231, 0.15), 0 10px 30px rgba(0, 0, 0, 0.06);
+}
+
+/* Material form field custom styling for rounded clean inputs */
+::ng-deep .custom-form-field .mdc-text-field--outlined {
+  --mdc-outlined-text-field-container-shape: 10px;
+  --mdc-outlined-text-field-outline-color: #e2e8f0;
+  --mdc-outlined-text-field-focus-outline-color: #6c5ce7;
+  --mdc-outlined-text-field-hover-outline-color: #cbd5e1;
+  background-color: #ffffff;
+  transition: all 0.2s ease-in-out;
+}
+
+::ng-deep .custom-form-field .mdc-text-field--outlined:hover {
+  background-color: #ffffff;
+}
+
+::ng-deep .custom-form-field.mat-focused .mdc-text-field--outlined {
+  background-color: #ffffff;
+  box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.12);
+}
+
+::ng-deep .custom-form-field .mat-mdc-form-field-flex {
+  align-items: center;
+  padding-left: 12px !important;
+  padding-right: 12px !important;
+  height: 48px;
+}
+
+::ng-deep .custom-form-field .mat-mdc-form-field-subscript-wrapper {
+  display: none;
+}
+
+::ng-deep .custom-form-field .mat-mdc-icon-button {
+  width: 36px;
+  height: 36px;
+  padding: 6px;
+}
+
+::ng-deep .custom-form-field input.mat-mdc-input-element {
+  font-size: 0.95rem;
+  color: #1e293b;
+  font-weight: 400;
+}
+
+::ng-deep .custom-form-field input.mat-mdc-input-element::placeholder {
+  color: #a0aec0;
+}

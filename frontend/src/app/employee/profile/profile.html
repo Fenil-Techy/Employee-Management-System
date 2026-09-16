@@ -1,0 +1,345 @@
+<div class="space-y-6 relative">
+
+  <!-- Floating Toast Notification Banner with Design System Theme -->
+  @if (showToast()) {
+    <div
+      class="toast-animate fixed top-6 right-6 z-50 flex items-center gap-3.5 px-5 py-4 rounded-2xl bg-white/95 backdrop-blur-md text-slate-800 shadow-2xl shadow-indigo-950/15 border border-slate-150 transition-all duration-300 min-w-[320px] max-w-md"
+      [class.border-l-4]="true"
+      [class.border-l-emerald-500]="toastType() === 'success'"
+      [class.border-l-rose-500]="toastType() === 'error'"
+    >
+      <!-- Icon Badge -->
+      <div
+        class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 shadow-sm"
+        [class.bg-emerald-50]="toastType() === 'success'"
+        [class.text-emerald-600]="toastType() === 'success'"
+        [class.bg-rose-50]="toastType() === 'error'"
+        [class.text-rose-600]="toastType() === 'error'"
+      >
+        <mat-icon class="!w-5 !h-5 !text-xl leading-none flex items-center justify-center">
+          {{ toastType() === 'success' ? 'check_circle' : 'error' }}
+        </mat-icon>
+      </div>
+
+      <!-- Message Text -->
+      <div class="flex flex-col pr-2">
+        <span
+          class="text-[10px] font-extrabold uppercase tracking-wider"
+          [class.text-emerald-600]="toastType() === 'success'"
+          [class.text-rose-600]="toastType() === 'error'"
+        >
+          {{ toastType() === 'success' ? 'Success' : 'Notice' }}
+        </span>
+        <span class="text-sm font-bold text-slate-800 leading-snug">
+          {{ toastMessage() }}
+        </span>
+      </div>
+
+      <!-- Close Button -->
+      <button
+        (click)="showToast.set(false)"
+        class="text-slate-400 hover:text-slate-600 transition-colors ml-auto p-1.5 rounded-xl hover:bg-slate-100"
+      >
+        <mat-icon class="!w-4 !h-4 !text-base leading-none flex items-center justify-center">close</mat-icon>
+      </button>
+    </div>
+  }
+
+  <!-- Profile Hero Card with Avatar & Action Buttons -->
+  <div class="bg-white rounded-[28px] p-6 sm:p-8 border border-slate-100 shadow-sm relative overflow-hidden">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
+
+      <!-- User Info Header -->
+      <div class="flex items-center gap-5">
+        <!-- Initial Avatar Badge -->
+        <div class="w-20 h-20 rounded-3xl bg-gradient-to-br from-[#6c5ce7] via-[#8c7ae6] to-[#a29bfe] text-white flex items-center justify-center text-3xl font-extrabold shadow-lg shadow-purple-500/20 shrink-0">
+          {{ getInitial(profile()?.name || profile()?.first_name) }}
+        </div>
+
+        <div class="space-y-1">
+          <div class="flex items-center gap-3">
+            <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+              {{ profile()?.name || (profile()?.first_name + ' ' + (profile()?.last_name || '')) || 'Employee' }}
+            </h1>
+            <span class="px-3 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200/80">
+              Active Member
+            </span>
+          </div>
+
+          <p class="text-slate-500 text-xs sm:text-sm font-medium">
+            {{ profile()?.designation || 'Staff' }} • {{ profile()?.department || 'General' }}
+          </p>
+          <p class="text-xs text-slate-400 font-mono">
+            ID: #{{ profile()?.id || '---' }}
+          </p>
+        </div>
+      </div>
+
+      <!-- Action Buttons (Edit Profile & Password Reset) -->
+      <div class="flex flex-wrap items-center gap-3 shrink-0">
+        <!-- Edit Profile Button -->
+        <button
+          (click)="openEditModal()"
+          class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full bg-[#6c5ce7] hover:bg-[#5b4bc4] text-white text-xs sm:text-sm font-semibold shadow-md shadow-purple-500/20 transition-all duration-200 active:scale-95"
+        >
+          <mat-icon class="!w-4 !h-4 !text-base leading-none flex items-center justify-center">edit</mat-icon>
+          <span>Edit Profile</span>
+        </button>
+
+        <!-- Password Reset Button -->
+        <button
+          (click)="openResetPasswordModal()"
+          class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs sm:text-sm font-semibold border border-slate-200/80 transition-all duration-200 active:scale-95"
+        >
+
+          <mat-icon class="!w-4 !h-4 !text-base leading-none flex items-center justify-center text-slate-500">lock_reset</mat-icon>
+          <span>Reset Password</span>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Information Cards Grid -->
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+    <!-- Card 1: Personal Information -->
+    <div class="bg-white rounded-[28px] p-6 sm:p-7 border border-slate-100 shadow-sm space-y-5">
+      <div class="flex items-center gap-3 border-b border-slate-100 pb-4">
+        <div class="w-10 h-10 rounded-xl bg-purple-50 text-[#6c5ce7] flex items-center justify-center font-bold shadow-sm">
+          <mat-icon class="!w-5 !h-5 !text-xl">person</mat-icon>
+        </div>
+        <div>
+          <h3 class="text-base font-extrabold text-slate-900 tracking-tight">Personal Information</h3>
+          <p class="text-xs font-medium text-slate-400">Account identity and email details</p>
+        </div>
+      </div>
+
+      <div class="space-y-4 text-sm">
+        <div class="flex justify-between items-center py-2 border-b border-slate-50">
+          <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">First Name</span>
+          <span class="font-bold text-slate-800">{{ profile()?.first_name || '---' }}</span>
+        </div>
+
+        <div class="flex justify-between items-center py-2 border-b border-slate-50">
+          <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Last Name</span>
+          <span class="font-bold text-slate-800">{{ profile()?.last_name || '---' }}</span>
+        </div>
+
+        <div class="flex justify-between items-center py-2 border-b border-slate-50">
+          <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Work Email</span>
+          <span class="font-bold text-[#6c5ce7]">{{ profile()?.email || '---' }}</span>
+        </div>
+
+        <div class="flex justify-between items-center py-2">
+          <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Employee ID</span>
+          <span class="font-mono font-bold text-slate-800">#{{ profile()?.id || '---' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 2: Corporate Placement -->
+    <div class="bg-white rounded-[28px] p-6 sm:p-7 border border-slate-100 shadow-sm space-y-5">
+      <div class="flex items-center gap-3 border-b border-slate-100 pb-4">
+        <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold shadow-sm">
+          <mat-icon class="!w-5 !h-5 !text-xl">badge</mat-icon>
+        </div>
+        <div>
+          <h3 class="text-base font-extrabold text-slate-900 tracking-tight">Workplace Placement</h3>
+          <p class="text-xs font-medium text-slate-400">Position, unit, and access role</p>
+        </div>
+      </div>
+
+      <div class="space-y-4 text-sm">
+        <div class="flex justify-between items-center py-2 border-b border-slate-50">
+          <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Designation</span>
+          <span class="font-bold text-slate-800">{{ profile()?.designation || 'Staff Member' }}</span>
+        </div>
+
+        <div class="flex justify-between items-center py-2 border-b border-slate-50">
+          <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Department</span>
+          <span class="font-bold text-slate-800">{{ profile()?.department || 'General' }}</span>
+        </div>
+
+        <div class="flex justify-between items-center py-2 border-b border-slate-50">
+          <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">System Role</span>
+          <span class="font-bold capitalize text-slate-800">{{ profile()?.role || 'employee' }}</span>
+        </div>
+
+        <div class="flex justify-between items-center py-2">
+          <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Account Status</span>
+          <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+            Active
+          </span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Edit Profile Modal Dialog -->
+  @if (isEditModalOpen()) {
+    <div class="fixed inset-0 z-50 bg-slate-950/50 backdrop-blur-md flex items-center justify-center p-4 sm:p-6">
+      <div class="bg-white rounded-[32px] shadow-2xl border border-slate-100 p-8 sm:p-10 w-full max-w-lg space-y-6 relative animate-in fade-in zoom-in-95 duration-200">
+
+        <!-- Modal Header -->
+        <div class="flex items-center justify-between border-b border-slate-100 pb-5">
+          <div class="flex items-center gap-4">
+            <div class="w-12 h-12 rounded-2xl bg-[#6c5ce7]/10 flex items-center justify-center text-[#6c5ce7] shrink-0">
+              <mat-icon class="!w-6 !h-6 !text-2xl leading-none flex items-center justify-center">edit</mat-icon>
+            </div>
+            <div>
+              <h2 class="text-2xl font-extrabold text-slate-900 tracking-tight">
+                Edit Profile
+              </h2>
+              <p class="text-xs sm:text-sm font-medium text-slate-500 mt-0.5">
+                Update your personal name and email address.
+              </p>
+            </div>
+          </div>
+          <button (click)="closeEditModal()" class="text-slate-400 hover:text-slate-600 rounded-xl p-2 hover:bg-slate-100 transition-colors">
+            <mat-icon class="!w-5 !h-5 !text-xl leading-none flex items-center justify-center">close</mat-icon>
+          </button>
+        </div>
+
+        <!-- Form Inputs -->
+        <div class="space-y-4 text-sm">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="flex flex-col gap-2">
+              <label class="font-semibold text-slate-700 text-xs">First Name</label>
+              <input
+                type="text"
+                [ngModel]="firstName()"
+                (ngModelChange)="firstName.set($event)"
+                placeholder="John"
+                class="w-full h-12 px-4 rounded-xl border border-slate-200 focus:border-[#6c5ce7] focus:ring-4 focus:ring-[#6c5ce7]/10 outline-none transition-all text-sm font-medium"
+              />
+            </div>
+
+            <div class="flex flex-col gap-2">
+              <label class="font-semibold text-slate-700 text-xs">Last Name</label>
+              <input
+                type="text"
+                [ngModel]="lastName()"
+                (ngModelChange)="lastName.set($event)"
+                placeholder="Doe"
+                class="w-full h-12 px-4 rounded-xl border border-slate-200 focus:border-[#6c5ce7] focus:ring-4 focus:ring-[#6c5ce7]/10 outline-none transition-all text-sm font-medium"
+              />
+            </div>
+          </div>
+
+          <div class="flex flex-col gap-2">
+            <label class="font-semibold text-slate-700 text-xs">Work Email Address</label>
+            <input
+              type="email"
+              [ngModel]="email()"
+              (ngModelChange)="email.set($event)"
+              placeholder="john.doe@company.com"
+              class="w-full h-12 px-4 rounded-xl border border-slate-200 focus:border-[#6c5ce7] focus:ring-4 focus:ring-[#6c5ce7]/10 outline-none transition-all text-sm font-medium"
+            />
+          </div>
+        </div>
+
+        <!-- Modal Actions -->
+        <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
+          <button
+            type="button"
+            (click)="closeEditModal()"
+            class="px-6 py-3 rounded-full text-xs font-semibold text-slate-600 hover:bg-slate-100 transition-colors border border-slate-200"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            (click)="saveProfile()"
+            class="px-7 py-3 rounded-full bg-[#6c5ce7] hover:bg-[#5b4bc4] text-white text-xs font-semibold shadow-lg shadow-purple-500/25 transition-all active:scale-95"
+          >
+            Save Changes
+          </button>
+        </div>
+
+      </div>
+    </div>
+  }
+
+  <!-- Reset Password Modal Dialog -->
+  @if (isPasswordModalOpen()) {
+    <div class="fixed inset-0 z-50 bg-slate-950/50 backdrop-blur-md flex items-center justify-center p-4 sm:p-6">
+      <div class="bg-white rounded-[32px] shadow-2xl border border-slate-100 p-8 sm:p-10 w-full max-w-lg space-y-6 relative animate-in fade-in zoom-in-95 duration-200">
+
+        <!-- Modal Header -->
+        <div class="flex items-center justify-between border-b border-slate-100 pb-5">
+          <div class="flex items-center gap-4">
+            <div class="w-12 h-12 rounded-2xl bg-slate-100 text-slate-700 flex items-center justify-center shrink-0">
+              <mat-icon class="!w-6 !h-6 !text-2xl leading-none flex items-center justify-center">lock_reset</mat-icon>
+            </div>
+            <div>
+              <h2 class="text-2xl font-extrabold text-slate-900 tracking-tight">
+                Reset Password
+              </h2>
+              <p class="text-xs sm:text-sm font-medium text-slate-500 mt-0.5">
+                Enter your current password and choose a new password.
+              </p>
+            </div>
+          </div>
+          <button (click)="closeResetPasswordModal()" class="text-slate-400 hover:text-slate-600 rounded-xl p-2 hover:bg-slate-100 transition-colors">
+            <mat-icon class="!w-5 !h-5 !text-xl leading-none flex items-center justify-center">close</mat-icon>
+          </button>
+        </div>
+
+        <!-- Form Inputs -->
+        <div class="space-y-4 text-sm">
+          <div class="flex flex-col gap-2">
+            <label class="font-semibold text-slate-700 text-xs">Current Password</label>
+            <input
+              type="password"
+              [ngModel]="currentPassword()"
+              (ngModelChange)="currentPassword.set($event); currentPasswordError.set(false)"
+              placeholder="Enter current password"
+              class="w-full h-12 px-4 rounded-xl border border-slate-200 focus:border-[#6c5ce7] focus:ring-4 focus:ring-[#6c5ce7]/10 outline-none transition-all text-sm font-medium"
+            />
+            @if(currentPasswordError()){
+              <p class="text-red-500 pt-1">Current password does not matched!</p>
+            }
+          </div>
+
+          <div class="flex flex-col gap-2">
+            <label class="font-semibold text-slate-700 text-xs">New Password</label>
+            <input
+              type="password"
+              [ngModel]="newPassword()"
+              (ngModelChange)="newPassword.set($event); newPasswordError.set(false)"
+              placeholder="Enter new password (min. 8 characters)"
+              class="w-full h-12 px-4 rounded-xl border border-slate-200 focus:border-[#6c5ce7] focus:ring-4 focus:ring-[#6c5ce7]/10 outline-none transition-all text-sm font-medium"
+              [class.border-red-400]="newPasswordError()"
+            />
+            @if (newPasswordError()) {
+              <p class="text-red-500 pt-1 text-xs font-semibold">New password must be at least 8 characters long!</p>
+            }
+          </div>
+        </div>
+
+        <!-- Modal Actions -->
+        <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
+          <button
+            type="button"
+            (click)="closeResetPasswordModal()"
+            class="px-6 py-3 rounded-full text-xs font-semibold text-slate-600 hover:bg-slate-100 transition-colors border border-slate-200"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            (click)="submitPasswordReset()"
+            class="px-7 py-3 rounded-full bg-[#6c5ce7] hover:bg-[#5b4bc4] text-white text-xs font-semibold shadow-lg shadow-purple-500/25 transition-all active:scale-95"
+          >
+            Update Password
+          </button>
+        </div>
+
+      </div>
+    </div>
+  }
+
+</div>
