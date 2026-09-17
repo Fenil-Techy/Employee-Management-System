@@ -17,6 +17,7 @@ export interface Employee {
   department?: string;
   created_at?: string;
   updated_at?: string;
+  joining_date?:string;
 }
 
 @Component({
@@ -56,6 +57,7 @@ export class Employees {
   role = signal('employee');
   designation = signal('Software Engineer');
   department = signal('Engineering');
+  joiningDate=signal('')
 
   ngOnInit() {
     this.fetchEmployees();
@@ -103,6 +105,7 @@ export class Employees {
     this.role.set('employee');
     this.designation.set('Software Engineer');
     this.department.set('Engineering');
+    this.joiningDate.set('');
     this.isModalOpen.set(true);
   }
 
@@ -174,6 +177,7 @@ export class Employees {
       email: em,
       password: pw,
       status: this.status(),
+      joining_date: this.joiningDate(),
       role: this.role() === 'admin' ? 1 : 2,
       designation: this.designation() === 'Software Engineer Intern' ? 1 : this.designation() === 'Software Engineer' ? 2 : this.designation() === "Senior Software Engineer" ? 3 : this.designation() === 'HR Executive' ? 4 : 1,
       department: this.department() === 'IT' ? 1 : this.department() === 'Engineering' ? 2 : this.department() === 'Human Resources' ? 3 : this.department() === 'Finance' ? 4 : 1

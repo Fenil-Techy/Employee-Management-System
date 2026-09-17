@@ -89,20 +89,20 @@
                   <h3 class="font-extrabold text-slate-900 text-xs sm:text-sm truncate">
                     {{ leave.name }}
                   </h3>
-                  <span class="text-[10px] font-semibold text-slate-400 block">Allowed</span>
+                  <span class="text-[10px] font-semibold text-slate-400 block">Entitled</span>
                 </div>
               </div>
 
               <div class="text-right shrink-0">
                 <span class="text-xl font-black text-slate-900 tracking-tight">
-                  {{ leave.annual_days }}
+                  {{ getEntitledDays(leave.id) }}
                 </span>
                 <span class="text-[10px] font-bold text-slate-500 block">Days</span>
               </div>
             </div>
           }
 
-          <!-- Total Quota Card -->
+          <!-- Total Balance Card -->
           <div class="bg-gradient-to-r from-[#6c5ce7] to-[#8c7ae6] rounded-2xl p-4 text-white shadow-md shadow-purple-500/10 flex items-center justify-between gap-3">
             <div class="flex items-center gap-3">
               <div class="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-md text-white flex items-center justify-center shrink-0">
@@ -110,9 +110,9 @@
               </div>
               <div>
                 <h3 class="font-extrabold text-white text-xs sm:text-sm tracking-tight">
-                  Total Quota
+                  Leave Balance
                 </h3>
-                <span class="text-[10px] font-semibold text-purple-100 block">Annual Sum</span>
+                <span class="text-[10px] font-semibold text-purple-100 block">Entitled - Approved</span>
               </div>
             </div>
 

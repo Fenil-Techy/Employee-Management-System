@@ -32,11 +32,11 @@ app.post("/login", async (req, res) => {
         if (getEmployee.rows.length === 0) {
             return res.status(401).send({ "error": "Invalid email or password" })
         }
-        if (getEmployee.rows[0].status==="disabled") {
+        if (getEmployee.rows[0].status === "disabled") {
             return res.status(403).send({ "error": "Your account is disabled" })
         }
         const storedPassword = getEmployee.rows[0].password
-        const matchPassword=await bcrypt.compare(password,storedPassword)
+        const matchPassword = await bcrypt.compare(password, storedPassword)
 
         if (!matchPassword) {
             return res.status(401).send({
@@ -44,7 +44,7 @@ app.post("/login", async (req, res) => {
             })
         }
 
-        const token = jwt.sign({ "name":getEmployee.rows[0].first_name,"id": getEmployee.rows[0].id, "role": getEmployee.rows[0].role }, process.env.JWT_SECRET,{expiresIn:"1h"})
+        const token = jwt.sign({ "name": getEmployee.rows[0].first_name, "id": getEmployee.rows[0].id, "role": getEmployee.rows[0].role }, process.env.JWT_SECRET, { expiresIn: "1h" })
         return res.status(200).send({ "message": "Login success", "role": getEmployee.rows[0].role, token })
     } catch (error) {
         return res.status(500).send("Internal server error")
@@ -89,14 +89,14 @@ app.get("/profile", authMiddleware, async (req, res) => {
         return res.status(200).send({ user: req.user });
     }
 });
-app.put("/edit-profile",authMiddleware,async(req,res)=>{
+app.put("/edit-profile", authMiddleware, async (req, res) => {
     try {
-        const empId=req.user.id
-        const {first_name,last_name,email}=req.body
+        const empId = req.user.id
+        const { first_name, last_name, email } = req.body
         const result = await pool.query(`
             update employees set first_name=$1,last_name=$2,email=$3 where id=$4 returning first_name,last_name,email
-            `,[first_name,last_name,email,empId])
-        return res.status(200).send({message:"Profile updated successfully"})
+            `, [first_name, last_name, email, empId])
+        return res.status(200).send({ message: "Profile updated successfully" })
     } catch (error) {
         console.error(error);
         return res.status(500).send({ error: "Internal server error" });
@@ -110,7 +110,7 @@ app.put("/password-reset", authMiddleware, async (req, res) => {
             select a.password from user_accounts as a 
             where a.employee_id=$1
             `, [empId]);
-    
+
         if (result.rows.length > 0) {
             const storedPassword = result.rows[0].password;
             const isCurrentPassword = await bcrypt.compare(oldPassword, storedPassword);
@@ -140,6 +140,7 @@ app.get("/employees", authMiddleware, roleMiddleware("admin"), async (req, res) 
             e.last_name,
             e.email,
             e.status,
+            e.joining_date,
             r.name as role,
             des.name as designation,
             d.name as department
@@ -153,7 +154,7 @@ app.get("/employees", authMiddleware, roleMiddleware("admin"), async (req, res) 
             order by e.id
             `
         )
-       
+
         res.status(200).send(result.rows)
 
     } catch (error) {
@@ -170,6 +171,7 @@ app.get("/employees/:id", authMiddleware, roleMiddleware("admin"), async (req, r
             e.first_name,
             e.last_name,
             e.email,
+            e.joining_date,
             r.name as role,
             des.name as designation,
             d.name as department
@@ -207,7 +209,8 @@ app.post("/employees", authMiddleware, roleMiddleware("admin"), async (req, res)
             designation,
             department,
             password,
-            status
+            status,
+            joining_date
         } = req.body;
 
         // Hash password
@@ -225,9 +228,10 @@ app.post("/employees", authMiddleware, roleMiddleware("admin"), async (req, res)
                 role_id,
                 designation_id,
                 department_id,
-                status
+                status,
+                joining_date
             )
-            VALUES ($1, $2, $3, $4, $5, $6, $7)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
             RETURNING
                 id,
                 first_name,
@@ -237,7 +241,8 @@ app.post("/employees", authMiddleware, roleMiddleware("admin"), async (req, res)
                 role_id,
                 designation_id,
                 department_id,
-                created_at
+                created_at,
+                joining_date
         `, [
             first_name,
             last_name,
@@ -245,7 +250,8 @@ app.post("/employees", authMiddleware, roleMiddleware("admin"), async (req, res)
             role,
             designation,
             department,
-            status || 'active'
+            status || 'active',
+            joining_date
         ]);
 
         // Create login account
@@ -685,14 +691,14 @@ app.get("/leave-types", authMiddleware, async (req, res) => {
         });
     }
 });
-app.post("/leave-types", authMiddleware,roleMiddleware('admin'), async (req, res) => {
+app.post("/leave-types", authMiddleware, roleMiddleware('admin'), async (req, res) => {
     try {
-        const {name,days}=req.body
+        const { name, days } = req.body
         const result = await pool.query(`
             insert into leave_types(name,annual_days) values($1,$2)
-        `,[name,days]);
+        `, [name, days]);
 
-        return res.status(200).send({message:"new leave added successfully"});
+        return res.status(200).send({ message: "new leave added successfully" });
 
     } catch (error) {
         console.error(error);
@@ -701,15 +707,15 @@ app.post("/leave-types", authMiddleware,roleMiddleware('admin'), async (req, res
         });
     }
 });
-app.put("/leave-types/:id", authMiddleware,roleMiddleware('admin'), async (req, res) => {
+app.put("/leave-types/:id", authMiddleware, roleMiddleware('admin'), async (req, res) => {
     try {
-        const id=req.params.id
-        const {days}=req.body
+        const id = req.params.id
+        const { days } = req.body
         const result = await pool.query(`
             update leave_types set annual_days=$1 where id=$2
-        `,[days,id]);
+        `, [days, id]);
 
-        return res.status(200).send({message:"leaves updated successfully"});
+        return res.status(200).send({ message: "leaves updated successfully" });
 
     } catch (error) {
         console.error(error);
@@ -725,7 +731,7 @@ app.delete("/leave-types/:id", authMiddleware, roleMiddleware('admin'), async (r
         const result = await pool.query(`
             DELETE FROM leave_types WHERE id = $1 RETURNING id, name
         `, [id]);
-        
+
         if (result.rows.length === 0) {
             return res.status(404).send({ error: "Leave type not found" });
         }
@@ -796,7 +802,7 @@ app.post("/leave-requests", authMiddleware, async (req, res) => {
     }
 });
 
-app.get("/my-leave-requests", authMiddleware,roleMiddleware('employee'), async (req, res) => {
+app.get("/my-leave-requests", authMiddleware, roleMiddleware('employee'), async (req, res) => {
     try {
         const employee_id = req.user.id;
         const result = await pool.query(`
@@ -884,6 +890,107 @@ app.put("/leave-requests/:id/status", authMiddleware, roleMiddleware("admin"), a
     } catch (error) {
         console.error(error);
         return res.status(500).send({ error: "Internal server error" });
+    }
+});
+
+app.get("/leave-balance", authMiddleware, async (req, res) => {
+    try {
+        const employeeId = req.user.id;
+
+        // Get employee joining date
+        const employeeResult = await pool.query(
+            `
+      SELECT joining_date
+      FROM employees
+      WHERE id = $1
+      `,
+            [employeeId]
+        );
+
+        if (employeeResult.rows.length === 0) {
+            return res.status(404).send({
+                error: "Employee not found"
+            });
+        }
+
+        const joiningDate = employeeResult.rows[0].joining_date;
+
+        if (!joiningDate) {
+            return res.status(400).send({
+                error: "Joining date is not available"
+            });
+        }
+
+        // Current year
+        const currentYear = new Date().getFullYear();
+
+        // Joining year
+        const joiningYear = new Date(joiningDate).getFullYear();
+
+        let eligibleDays = 0;
+
+        const startOfYear = new Date(currentYear, 0, 1);
+        const endOfYear = new Date(currentYear, 11, 31);
+
+        if (joiningYear < currentYear) {
+
+            eligibleDays =
+                Math.floor(
+                    (endOfYear.getTime() - startOfYear.getTime()) /
+                    (1000 * 60 * 60 * 24)
+                ) + 1;
+
+        } else if (joiningYear === currentYear) {
+
+            const startDate = new Date(joiningDate);
+
+            eligibleDays =
+                Math.floor(
+                    (endOfYear.getTime() - startDate.getTime()) /
+                    (1000 * 60 * 60 * 24)
+                ) + 1;
+        }
+
+        // Get leave types
+        const leaveTypesResult = await pool.query(
+            `
+      SELECT id, name, annual_days
+      FROM leave_types
+      ORDER BY id
+      `
+        );
+
+        const leaves = leaveTypesResult.rows.map((leave) => {
+
+            const entitledDays = Math.round(
+                (leave.annual_days / 365) * eligibleDays
+            );
+
+            return {
+                id: leave.id,
+                name: leave.name,
+                annual_days: leave.annual_days,
+                entitled_days: entitledDays
+            };
+        });
+
+        const totalEntitled = leaves.reduce(
+            (total, leave) => total + leave.entitled_days,
+            0
+        );
+
+        return res.status(200).send({
+            eligible_days: eligibleDays,
+            total_entitled: totalEntitled,
+            leaves
+        });
+
+    } catch (error) {
+        console.error(error);
+
+        return res.status(500).send({
+            error: "Internal server error"
+        });
     }
 });
 

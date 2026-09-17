@@ -10,6 +10,19 @@ interface leave_type {
   annual_days: number;
 }
 
+interface LeaveBalanceItem {
+  id: number;
+  name: string;
+  annual_days: number;
+  entitled_days: number;
+}
+
+interface LeaveBalanceResponse {
+  eligible_days: number;
+  total_entitled: number;
+  leaves: LeaveBalanceItem[];
+}
+
 interface LeaveRequest {
   id: number;
   employee_id: number;
@@ -39,10 +52,21 @@ export class Employee_Dashboard {
   department = signal('');
   leave_types = signal<leave_type[]>([]);
   leaveRequests = signal<LeaveRequest[]>([]);
+  leaveBalanceData = signal<LeaveBalanceResponse | null>(null);
 
   totalLeavesAllowed = computed(() =>
     this.leave_types().reduce((total, leave) => total + Number(leave.annual_days || 0), 0)
   );
+
+  totalEntitledLeaves = computed(() => {
+    const data = this.leaveBalanceData();
+    if (data && typeof data.total_entitled === 'number') {
+      return data.total_entitled;
+    }
+    return this.totalLeavesAllowed();
+  });
+
+  totalAvailableLeaves = computed(() => this.totalEntitledLeaves());
 
   totalApprovedLeave = computed(() =>
     this.leaveRequests()
@@ -50,8 +74,9 @@ export class Employee_Dashboard {
       .reduce((total, approved) => total + this.calculateDurationDays(approved.start_date, approved.end_date), 0)
   );
 
-  totalLeaveBalance = computed(() => this.totalLeavesAllowed() - this.totalApprovedLeave());
-  totalAvailableLeaves = computed(() => this.totalLeaveBalance());
+  totalLeaveBalance = computed(() =>
+    this.totalEntitledLeaves() - this.totalApprovedLeave()
+  );
 
   ngOnInit() {
     this.http.get<any>("http://localhost:3000/profile").subscribe({
@@ -69,6 +94,20 @@ export class Employee_Dashboard {
     });
     this.fetchLeaveTypes();
     this.fetchLeaveRequests();
+    this.fetchLeaveBalance();
+  }
+
+  fetchLeaveBalance() {
+    this.http.get<LeaveBalanceResponse>("http://localhost:3000/leave-balance").subscribe({
+      next: (response) => {
+        if (response) {
+          this.leaveBalanceData.set(response);
+        }
+      },
+      error: (error) => {
+        console.error("Failed to fetch leave balance:", error);
+      }
+    });
   }
 
   fetchLeaveTypes() {

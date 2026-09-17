@@ -10,6 +10,19 @@ export interface LeaveType {
   annual_days: number;
 }
 
+export interface LeaveBalanceItem {
+  id: number;
+  name: string;
+  annual_days: number;
+  entitled_days: number;
+}
+
+export interface LeaveBalanceResponse {
+  eligible_days: number;
+  total_entitled: number;
+  leaves: LeaveBalanceItem[];
+}
+
 export interface LeaveRequest {
   id: number;
   employee_id: number;
@@ -42,8 +55,9 @@ export class Leaves implements OnInit {
   reason = signal('');
   isSubmitting = signal(false);
 
-  // History Signal
+  // History & Balance Signals
   leaveRequests = signal<LeaveRequest[]>([]);
+  leaveBalanceData = signal<LeaveBalanceResponse | null>(null);
 
   // Toast Notification States
   showToast = signal(false);
@@ -51,18 +65,31 @@ export class Leaves implements OnInit {
   toastType = signal<'success' | 'error'>('success');
   private toastTimeout: any = null;
 
-  // Computed KPI Balances & Calculations
+  // Computed KPI Balances & Calculations (Entitled - Approved)
   totalLeavesAllowed = computed(() =>
     this.leave_types().reduce((total, leave) => total + Number(leave.annual_days || 0), 0)
   );
-  totalAvailableLeaves = computed(() => this.totalLeavesAllowed());
+
+  totalEntitledLeaves = computed(() => {
+    const data = this.leaveBalanceData();
+    if (data && typeof data.total_entitled === 'number') {
+      return data.total_entitled;
+    }
+    return this.totalLeavesAllowed();
+  });
+
+  totalAvailableLeaves = computed(() => this.totalEntitledLeaves());
 
   totalApprovedLeave = computed(() =>
     this.leaveRequests()
       .filter((request) => (request.status || '').toLowerCase() === 'approved')
       .reduce((total, approved) => total + this.calculateDurationDays(approved.start_date, approved.end_date), 0)
   );
-  totalLeaveBalance = computed(() => this.totalAvailableLeaves() - this.totalApprovedLeave());
+
+  totalLeaveBalance = computed(() =>
+    this.totalEntitledLeaves() - this.totalApprovedLeave()
+  );
+
   casualLeaves = computed(() => {
     const leave = this.leave_types().find(l => l.name.toLowerCase().includes('casual'));
     return leave ? leave.annual_days : 0;
@@ -99,6 +126,29 @@ export class Leaves implements OnInit {
   ngOnInit() {
     this.fetchLeaveTypes();
     this.fetchLeaveRequests();
+    this.fetchLeaveBalance();
+  }
+
+  fetchLeaveBalance() {
+    this.http.get<LeaveBalanceResponse>('http://localhost:3000/leave-balance').subscribe({
+      next: (response) => {
+        if (response) {
+          this.leaveBalanceData.set(response);
+        }
+      },
+      error: (err) => {
+        console.error('Failed to fetch leave balance:', err);
+      }
+    });
+  }
+
+  getEntitledDays(leaveId: number): number {
+    const balanceItem = this.leaveBalanceData()?.leaves?.find(l => l.id === leaveId);
+    if (balanceItem && typeof balanceItem.entitled_days === 'number') {
+      return balanceItem.entitled_days;
+    }
+    const leave = this.leave_types().find(l => l.id === leaveId);
+    return leave?.annual_days || 0;
   }
 
   fetchLeaveTypes() {
@@ -191,6 +241,7 @@ export class Leaves implements OnInit {
         this.triggerToast(response?.message || 'Leave request submitted successfully!', 'success');
         this.resetForm();
         this.fetchLeaveRequests();
+        this.fetchLeaveBalance();
       },
       error: (err) => {
         this.isSubmitting.set(false);
